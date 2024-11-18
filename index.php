@@ -16,68 +16,87 @@ $stmt->execute(['searchQuery' => '%' . $searchQuery . '%']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bookstore</title>
+    <title>Modern Bookstore</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
             margin: 0;
             padding: 20px;
+            color: #333;
         }
         h1 {
             text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
             color: #333;
         }
         .search-container {
-            text-align: center;
-            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
         }
         .search-container input[type="text"] {
-            padding: 10px;
-            width: 300px;
+            padding: 10px 15px;
+            width: 350px;
             border: 1px solid #ccc;
-            border-radius: 4px;
+            border-radius: 25px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .search-container input[type="text"]:focus {
+            border-color: #007bff;
         }
         .search-container button {
-            padding: 10px 15px;
+            background-color: #007bff;
+            color: #fff;
             border: none;
-            background-color: #007BFF;
-            color: white;
-            border-radius: 4px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin-left: 10px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
         .search-container button:hover {
             background-color: #0056b3;
         }
         .book-list {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 20px;
+            max-width: 1200px;
+            margin: auto;
         }
         .book-item {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 200px;
-            padding: 15px;
-            text-align: center;
-            transition: transform 0.2s;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
         }
         .book-item:hover {
-            transform: translateY(-5px);
+            transform: translateY(-10px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        .book-content {
+            padding: 15px;
+            text-align: center;
         }
         .book-title {
-            font-size: 1.2em;
-            color: #007BFF;
+            display: block;
+            font-size: 1.25em;
+            margin-bottom: 10px;
+            color: #007bff;
             text-decoration: none;
+            transition: color 0.3s;
         }
         .book-title:hover {
-            text-decoration: underline;
+            color: #0056b3;
         }
         .book-price {
-            margin-top: 10px;
+            font-size: 1.1em;
             font-weight: bold;
             color: #28a745;
         }
@@ -85,22 +104,24 @@ $stmt->execute(['searchQuery' => '%' . $searchQuery . '%']);
 </head>
 <body>
 
-<h1>Welcome to the Bookstore</h1>
+<h1>Bookstore</h1>
 
 <div class="search-container">
     <form action="" method="GET">
         <input type="text" name="search" placeholder="Search for books..." value="<?= htmlspecialchars($searchQuery); ?>">
-        <button type="submit">Search</button>
+        <button type="submit"><i class="fas fa-search"></i></button>
     </form>
 </div>
 
 <div class="book-list">
     <?php while ($book = $stmt->fetch()) { ?>
         <div class="book-item">
-            <a class="book-title" href="./book.php?id=<?= $book['id']; ?>">
-                <?= htmlspecialchars($book['title']); ?>
-            </a>
-            <p class="book-price"><?= round($book['price'], 2); ?> &euro;</p>
+            <div class="book-content">
+                <a class="book-title" href="./book.php?id=<?= $book['id']; ?>">
+                    <?= htmlspecialchars($book['title']); ?>
+                </a>
+                <p class="book-price"><?= round($book['price'], 2); ?> &euro;</p>
+            </div>
         </div>
     <?php } ?>
 </div>
