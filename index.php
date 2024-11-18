@@ -2,7 +2,12 @@
 
 require_once('./connection.php');
 
-$stmt = $pdo->query('SELECT * FROM books WHERE is_deleted = 0');
+// Check if a search query is present
+$searchQuery = isset($_GET['search']) ? $_GET['search'] : '';
+
+// Prepare the SQL statement with a search filter
+$stmt = $pdo->prepare('SELECT * FROM books WHERE is_deleted = 0 AND title LIKE :searchQuery');
+$stmt->execute(['searchQuery' => '%' . $searchQuery . '%']);
 
 ?>
 
@@ -23,6 +28,27 @@ $stmt = $pdo->query('SELECT * FROM books WHERE is_deleted = 0');
         h1 {
             text-align: center;
             color: #333;
+        }
+        .search-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .search-container input[type="text"] {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .search-container button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .search-container button:hover {
+            background-color: #0056b3;
         }
         .book-list {
             display: flex;
@@ -60,6 +86,13 @@ $stmt = $pdo->query('SELECT * FROM books WHERE is_deleted = 0');
 <body>
 
 <h1>Welcome to the Bookstore</h1>
+
+<div class="search-container">
+    <form action="" method="GET">
+        <input type="text" name="search" placeholder="Search for books..." value="<?= htmlspecialchars($searchQuery); ?>">
+        <button type="submit">Search</button>
+    </form>
+</div>
 
 <div class="book-list">
     <?php while ($book = $stmt->fetch()) { ?>
