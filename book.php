@@ -79,7 +79,7 @@ $stmt->execute(['id' => $id]);
     .back-button {
         display: block;
         margin-bottom: 20px;
-        background-color: #6c757d;
+        background-color: #0096FF;
         color: white;
         padding: 10px 15px;
         text-align: center;
@@ -88,7 +88,7 @@ $stmt->execute(['id' => $id]);
         width: fit-content;
     }
     .back-button:hover {
-        background-color: #5a6268;
+        background-color: #0047AB;
     }
 </style>
 
