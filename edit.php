@@ -1,7 +1,79 @@
+<?php if (isset($_GET['error'])): ?>
+    <div class="error"><?= htmlspecialchars($_GET['error']); ?></div>
+<?php endif; ?>
+
+<?php if (!empty($error)): ?>
+    <div class="error"><?= htmlspecialchars($error); ?></div>
+<?php endif; ?>
+
+
+
+
 <?php
 require_once('./connection.php');
 
-$id = $_GET['id'];
+$id = $_GET['id'] ?? NULL;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'add_author') {
+    $authorId = $_POST['author_id'] ?? null;
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'remove_author') {
+        $authorId = $_POST['author_id'] ?? null;
+    
+        if (!empty($authorId)) {
+            // Remove the author from the book
+            $stmt = $pdo->prepare('DELETE FROM book_authors WHERE book_id = :book_id AND author_id = :author_id');
+            $stmt->execute([
+                'book_id' => $id,
+                'author_id' => $authorId,
+            ]);
+    
+            // Redirect to prevent re-submission
+            header("Location: ./edit.php?id=$id");
+            exit;
+        } else {
+            $error = "Invalid author selected for removal.";
+        }
+    }
+    
+
+    if (!empty($authorId)) {
+        // Add the author to the book
+        $stmt = $pdo->prepare('INSERT INTO book_authors (book_id, author_id) VALUES (:book_id, :author_id)');
+        $stmt->execute([
+            'book_id' => $id,
+            'author_id' => $authorId,
+        ]);
+
+        // Redirect to prevent re-submission
+        header("Location: ./edit.php?id=$id");
+        exit;
+    } else {
+        $error = "Please select a valid author to add.";
+    }
+}
+
+
+// Check if the "Add New Author" form is submitted
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'add_new_author') {
+    $firstName = trim($_POST['first_name']);
+    $lastName = trim($_POST['last_name']);
+
+    if (!empty($firstName) && !empty($lastName)) {
+        // Insert the new author into the authors table
+        $stmt = $pdo->prepare('INSERT INTO authors (first_name, last_name) VALUES (:first_name, :last_name)');
+        $stmt->execute([
+            'first_name' => $firstName,
+            'last_name' => $lastName
+        ]);
+
+        // Optional: Refresh the available authors list
+        header("Location: ./edit.php?id=" . $id);
+        exit;
+    } else {
+        $error = "Please provide both a first name and a last name.";
+    }
+}
 
 // Fetch book data
 $stmt = $pdo->prepare('SELECT * FROM books WHERE id = :id');
@@ -96,6 +168,10 @@ $availableAuthorsStmt->execute(['book_id' => $id]);
         .remove-btn svg {
             vertical-align: middle;
         }
+        .error {
+            color: red;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -108,14 +184,15 @@ $availableAuthorsStmt->execute(['book_id' => $id]);
     <h3>Edit Book: <?= htmlspecialchars($book['title']); ?></h3>
 
     <form action="./update_book.php?id=<?= $id; ?>" method="post">
-        <label for="title">Title:</label>
-        <input type="text" name="title" value="<?= htmlspecialchars($book['title']); ?>">
+    <label for="title">Title:</label>
+    <input type="text" name="title" value="<?= htmlspecialchars($_POST['title'] ?? $book['title']); ?>">
 
-        <label for="price">Price:</label>
-        <input type="text" name="price" value="<?= htmlspecialchars($book['price']); ?>">
+    <label for="price">Price:</label>
+    <input type="text" name="price" value="<?= htmlspecialchars($_POST['price'] ?? $book['price']); ?>">
 
-        <button type="submit" name="action" value="save">Save</button>
-    </form>
+    <button type="submit" name="action" value="save">Save</button>
+</form>
+
 
     <h3>Authors</h3>
     <ul>
@@ -134,8 +211,7 @@ $availableAuthorsStmt->execute(['book_id' => $id]);
         <?php } ?>
     </ul>
 
-    <form action="./add_author.php" method="post">
-        <input type="hidden" name="book_id" value="<?= $id; ?>">
+    <form action="" method="post">
         <label for="author_id">Add Author:</label>
         <select name="author_id">
             <option value="">Select an author</option>
@@ -146,6 +222,20 @@ $availableAuthorsStmt->execute(['book_id' => $id]);
             <?php } ?>
         </select>
         <button type="submit" name="action" value="add_author">Add Author</button>
+    </form>
+
+    <form action="" method="post" style="margin-top: 20px;">
+        <h3>Add New Author</h3>
+        <?php if (!empty($error)) { ?>
+            <div class="error"><?= htmlspecialchars($error); ?></div>
+        <?php } ?>
+        <label for="first_name">First Name:</label>
+        <input type="text" name="first_name" required placeholder="Enter first name">
+        
+        <label for="last_name">Last Name:</label>
+        <input type="text" name="last_name" required placeholder="Enter last name">
+        
+        <button type="submit" name="action" value="add_new_author">Add New Author</button>
     </form>
 </div>
 

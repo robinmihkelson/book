@@ -1,18 +1,28 @@
 <?php
+require_once('./connection.php');
 
-// update book data
-if ( isset($_POST['action']) && $_POST['action'] == 'Salvesta' ) {
+$id = $_GET['id'];
 
-    require_once('.connection.php');
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'save') {
+    $title = trim($_POST['title']);
+    $price = trim($_POST['price']);
 
-    $id = $_GET['id'];
+    if (!empty($title) && is_numeric($price)) {
+        // Update the book
+        $stmt = $pdo->prepare('UPDATE books SET title = :title, price = :price WHERE id = :id');
+        $stmt->execute([
+            'title' => $title,
+            'price' => $price,
+            'id' => $id
+        ]);
 
-    $stmt = $pdo->prepare('UPDATE books SET title = :title, price = :price WHERE id = :id');
-    $stmt->execute(['id' => $id, 'title' => $_POST['title'], 'price' => $_POST['price'] ]);
-
-    header("Location: ./book.php?id={$id}");
-
-} else {
-
-    header("Location: ./index.php");
+        // Redirect back to edit.php
+        header("Location: ./edit.php?id=$id");
+        exit;
+    } else {
+        // Validation failed, redirect back to edit.php with an error
+        header("Location: ./edit.php?id=$id&error=Invalid+data");
+        exit;
+    }
 }
+?>
